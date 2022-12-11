@@ -14,7 +14,7 @@ NEWSPIDER_MODULE = 'ycor_scraper.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'ycor_scraper (+http://www.yourdomain.com)'
+USER_AGENT = 'ycor_scraper (+https://omara.ca) contact:lee@omara.ca'
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
