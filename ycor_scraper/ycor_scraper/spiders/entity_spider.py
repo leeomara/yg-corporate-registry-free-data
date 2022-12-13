@@ -7,7 +7,7 @@ class EntitySpider(scrapy.Spider):
     query_length_limit = 4
 
     def start_requests(self):
-        for first_ten in range(0, 9):
+        for first_ten in range(0, 10):
             url = 'https://ycor-reey.gov.yk.ca/search?name=' + str(first_ten)
             yield scrapy.Request(url=url, callback=self.parse)
 
