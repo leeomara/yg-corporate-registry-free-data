@@ -23,8 +23,9 @@ class EntitySpider(scrapy.Spider):
 
             if len(current) == self.query_length_limit:
                 # We've hit the limit, stop here.
-                self.log(f'Hit limit with {response.url}')
-                yield None
+                self.log(f'Hit limit with {response.url}, proceed no further')
+                # Maybe move this to a downloader middleware?
+                return
 
             # Not at the limit, so possibly create 10 new sub-requests
             for i in range(0,10):
