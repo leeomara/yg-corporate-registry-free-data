@@ -36,6 +36,8 @@ COOKIES_ENABLED = False
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
 
+QUERY_TO=1_000_000
+
 # Override the default request headers:
 #DEFAULT_REQUEST_HEADERS = {
 #   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -50,9 +52,9 @@ COOKIES_ENABLED = False
 
 # Enable or disable downloader middlewares
 # See https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'ycor_scraper.middlewares.YcorScraperDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+    'ycor_scraper.middlewares.YcorScraperDownloaderMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See https://docs.scrapy.org/en/latest/topics/extensions.html

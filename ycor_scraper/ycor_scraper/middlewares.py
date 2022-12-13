@@ -4,6 +4,7 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
+from scrapy.exceptions import IgnoreRequest
 
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
@@ -57,6 +58,11 @@ class YcorScraperSpiderMiddleware:
 
 
 class YcorScraperDownloaderMiddleware:
+
+    def __init__(self, query_to=1_000):
+        self.query_length_limit = len(str(query_to))
+        self.unseen = [str(item).zfill(self.query_length_limit) for item in range(0, query_to)]
+
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
     # passed objects.
@@ -64,40 +70,55 @@ class YcorScraperDownloaderMiddleware:
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
-        s = cls()
-        crawler.signals.connect(s.spider_opened, signal=signals.spider_opened)
-        return s
+        return cls(
+            query_to=crawler.settings.get('QUERY_TO')
+        )
 
     def process_request(self, request, spider):
-        # Called for each request that goes through the downloader
-        # middleware.
+        # Should we run this query?
 
-        # Must either:
+        # Don't apply to the robots.txt query.
+        if self.is_robots_url(request.url):
+          return None
+
+        query = spider.get_query(request.url)
+
+        if len(query) >= self.query_length_limit:
+            # We've hit the limit.
+            spider.logger.info(f'Hit limit with {request.url}, ignore request.')
+            raise IgnoreRequest
+
+
+        if not self.any_unseen(query):
+            spider.logger.info(f"No point in querying {query}, ignore request.")
+            raise IgnoreRequest
+
         # - return None: continue processing this request
-        # - or return a Response object
-        # - or return a Request object
-        # - or raise IgnoreRequest: process_exception() methods of
-        #   installed downloader middleware will be called
         return None
 
     def process_response(self, request, response, spider):
-        # Called with the response returned from the downloader.
+        # Unless there are too many results,
+        # Delete all matching ID numbers from the "unseen" list.
 
-        # Must either;
-        # - return a Response object
-        # - return a Request object
-        # - or raise IgnoreRequest
+        # Don't apply to the robots.txt query.
+        if self.is_robots_url(response.url):
+          return response
+
+        if not response.css('h5::text').get() == 'More than 100 entities found. Please be more specific.':
+            query = spider.get_query(response.url)
+            before_count = len(self.unseen)
+            self.unseen = list(filter(lambda id: query not in id, self.unseen))
+            after_count = len(self.unseen)
+            diff_count = before_count - after_count
+            spider.logger.info(f"Unseen has {after_count} remaining. Marked {diff_count} as seen for '{query}'.")
+
         return response
 
-    def process_exception(self, request, exception, spider):
-        # Called when a download handler or a process_request()
-        # (from other downloader middleware) raises an exception.
+    def any_unseen(self, query):
+        for unseen_id in self.unseen:
+            if query in unseen_id:
+              return True
+        return False
 
-        # Must either:
-        # - return None: continue processing this exception
-        # - return a Response object: stops process_exception() chain
-        # - return a Request object: stops process_exception() chain
-        pass
-
-    def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
+    def is_robots_url(self, url):
+        return "robots.txt" in url
