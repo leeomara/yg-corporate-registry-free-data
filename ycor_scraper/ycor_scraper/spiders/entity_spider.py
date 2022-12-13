@@ -7,11 +7,8 @@ class EntitySpider(scrapy.Spider):
     query_length_limit = 4
 
     def start_requests(self):
-        urls = [
-            'https://ycor-reey.gov.yk.ca/search?name=001',
-            'https://ycor-reey.gov.yk.ca/search?name=002',
-        ]
-        for url in urls:
+        for first_ten in range(0, 9):
+            url = 'https://ycor-reey.gov.yk.ca/search?name=' + str(first_ten)
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
@@ -81,7 +78,7 @@ class EntitySpider(scrapy.Spider):
         self.state['unseen'] = list(filter(lambda id: query not in id, self.state['unseen']))
         after_count = len(self.state['unseen'])
         diff_count = before_count - after_count
-        self.log(f"Unseen has {after_count} remaining. Marked {diff_count} as seen.")
+        self.log(f"Unseen has {after_count} remaining. Marked {diff_count} as seen for '{query}'.")
 
     def any_unseen(self, query):
         for unseen_id in self.state['unseen']:
