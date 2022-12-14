@@ -17,7 +17,7 @@ class EntitySpider(scrapy.Spider):
             for i in range(0,10):
                 next_query = current + str(i)
                 next_page = self.url_with_query(response.url, next_query)
-                yield scrapy.Request(next_page, callback=self.parse)
+                yield scrapy.Request(url=next_page, callback=self.parse)
         else:
             for entity in response.css("table tbody tr"):
                 yield {
