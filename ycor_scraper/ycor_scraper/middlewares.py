@@ -88,7 +88,6 @@ class YcorScraperDownloaderMiddleware:
             spider.logger.info(f'Hit limit with {request.url}, ignore request.')
             raise IgnoreRequest
 
-
         if not self.any_unseen(query):
             spider.logger.info(f"No point in querying {query}, ignore request.")
             raise IgnoreRequest
@@ -97,14 +96,14 @@ class YcorScraperDownloaderMiddleware:
         return None
 
     def process_response(self, request, response, spider):
-        # Unless there are too many results,
-        # Delete all matching ID numbers from the "unseen" list.
+        # Unless there are too many results (in which case no records are returned),
+        # delete all matching ID numbers from the "unseen" list.
 
         # Don't apply to the robots.txt query.
         if self.is_robots_url(response.url):
           return response
 
-        if not response.css('h5::text').get() == 'More than 100 entities found. Please be more specific.':
+        if not spider.too_many_results(response):
             query = spider.get_query(response.url)
             before_count = len(self.unseen)
             self.unseen = list(filter(lambda id: query not in id, self.unseen))
