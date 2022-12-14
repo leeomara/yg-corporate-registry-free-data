@@ -29,8 +29,6 @@ class EntitySpider(scrapy.Spider):
                 yield scrapy.Request(next_page, callback=self.parse)
         else:
             for entity in response.css("table tbody tr"):
-                # Consider implementing a duplicate filter.
-                #   https://docs.scrapy.org/en/latest/topics/item-pipeline.html#duplicates-filter
                 # TODO record the query number and all it's possible matches
                 yield {
                     'name': entity.css('td.name-view span span::text').get(),
@@ -39,8 +37,7 @@ class EntitySpider(scrapy.Spider):
                     'type': entity.css('span.entity-entity-type-translated::text').get(),
                     'number': entity.css('span.entity-fileno::text').get(),
                     'jurisdiction': entity.css('span.entity-jurisdiction::text').get(),
-                    'status': entity.css('span.entity-status-translated::text').get(),
-                    'query': current
+                    'status': entity.css('span.entity-status-translated::text').get()
                     # Filing and Profile reports are URLs that can be generated based on registry number.
                 }
 

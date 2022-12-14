@@ -7,7 +7,17 @@
 # useful for handling different item types with a single interface
 from itemadapter import ItemAdapter
 
+from scrapy.exceptions import DropItem
+
 
 class YcorScraperPipeline:
+    def __init__(self):
+        self.ids_seen = set()
+
     def process_item(self, item, spider):
-        return item
+        adapter = ItemAdapter(item)
+        if adapter['number'] in self.ids_seen:
+            raise DropItem(f"Duplicate item found: {item!r}")
+        else:
+            self.ids_seen.add(adapter['number'])
+            return item
