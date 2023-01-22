@@ -6,7 +6,7 @@ class EntitySpider(scrapy.Spider):
 
     def start_requests(self):
         for first_ten in range(0, 10):
-            url = 'https://ycor-reey.gov.yk.ca/search?name=' + str(first_ten)
+            url = 'https://ycor-reey.gov.yk.ca/search?name=' + str(9 - first_ten)
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
