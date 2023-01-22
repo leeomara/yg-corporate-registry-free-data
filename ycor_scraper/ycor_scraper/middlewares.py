@@ -59,9 +59,9 @@ class YcorScraperSpiderMiddleware:
 
 class YcorScraperDownloaderMiddleware:
 
-    def __init__(self, query_to=1_000):
+    def __init__(self, query_to=1_000_000):
         self.query_length_limit = len(str(query_to))
-        self.unseen = [str(item).zfill(self.query_length_limit) for item in range(0, query_to)]
+        self.unseen = [str(item).zfill(self.query_length_limit - 1) for item in range(0, query_to)]
 
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
