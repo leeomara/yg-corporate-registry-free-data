@@ -16,8 +16,8 @@ class YcorScraperPipeline:
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
-        if adapter['number'] in self.ids_seen:
+        if adapter["number"] in self.ids_seen:
             raise DropItem(f"Duplicate item found: {item!r}")
         else:
-            self.ids_seen.add(adapter['number'])
+            self.ids_seen.add(adapter["number"])
             return item

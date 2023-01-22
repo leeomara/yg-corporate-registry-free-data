@@ -54,14 +54,15 @@ class YcorScraperSpiderMiddleware:
             yield r
 
     def spider_opened(self, spider):
-        spider.logger.info('Spider opened: %s' % spider.name)
+        spider.logger.info("Spider opened: %s" % spider.name)
 
 
 class YcorScraperDownloaderMiddleware:
-
     def __init__(self, query_to=1_000_000):
         self.query_length_limit = len(str(query_to))
-        self.unseen = [str(item).zfill(self.query_length_limit - 1) for item in range(0, query_to)]
+        self.unseen = [
+            str(item).zfill(self.query_length_limit - 1) for item in range(0, query_to)
+        ]
 
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the downloader middleware does not modify the
@@ -70,22 +71,20 @@ class YcorScraperDownloaderMiddleware:
     @classmethod
     def from_crawler(cls, crawler):
         # This method is used by Scrapy to create your spiders.
-        return cls(
-            query_to=crawler.settings.get('QUERY_TO')
-        )
+        return cls(query_to=crawler.settings.get("QUERY_TO"))
 
     def process_request(self, request, spider):
         # Should we run this query?
 
         # Don't apply to the robots.txt query.
         if self.is_robots_url(request.url):
-          return None
+            return None
 
         query = spider.get_query(request.url)
 
         if len(query) >= self.query_length_limit:
             # We've hit the limit.
-            spider.logger.info(f'Hit limit with {request.url}, ignore request.')
+            spider.logger.info(f"Hit limit with {request.url}, ignore request.")
             raise IgnoreRequest
 
         if not self.any_unseen(query):
@@ -101,7 +100,7 @@ class YcorScraperDownloaderMiddleware:
 
         # Don't apply to the robots.txt query.
         if self.is_robots_url(response.url):
-          return response
+            return response
 
         if not spider.too_many_results(response):
             query = spider.get_query(response.url)
@@ -109,14 +108,16 @@ class YcorScraperDownloaderMiddleware:
             self.unseen = list(filter(lambda id: query not in id, self.unseen))
             after_count = len(self.unseen)
             diff_count = before_count - after_count
-            spider.logger.info(f"Unseen has {after_count} remaining. Marked {diff_count} as seen for '{query}'.")
+            spider.logger.info(
+                f"Unseen has {after_count} remaining. Marked {diff_count} as seen for '{query}'."
+            )
 
         return response
 
     def any_unseen(self, query):
         for unseen_id in self.unseen:
             if query in unseen_id:
-              return True
+                return True
         return False
 
     def is_robots_url(self, url):
